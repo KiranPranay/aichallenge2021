@@ -1,0 +1,13 @@
+module aichallenge_msgs {
+  module msg {
+    @verbatim (language="comment", text=
+      " ScoreData.msg")
+    struct ScoreData {
+      float time;
+      float rawTime;
+      int32 hasFinished;
+      float contactPenalty;
+      float trackLimitPenalty;
+    };
+  };
+};

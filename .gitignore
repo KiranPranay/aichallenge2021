@@ -1,0 +1,6 @@
+.vscode
+
+/autoware/adehome/*
+!aichallenge_ws
+/autoware/adehome/aichallenge_ws/*
+!src
