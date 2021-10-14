@@ -164,13 +164,13 @@ LINK TO CLOUDをクリックするとブラウザが開きクラスタ登録画�
 ### 地図、車両、プラグイン登録
 Store → Maps → IndianapolisMotorSpeedwayの+ボタンを押します。
 ![画面](/image/map.png)
-Store → Vehicles → DallaralL15の+ボタンを押します。
+Store → Vehicles → DallaraIL15の+ボタンを押します。
 ![画面](/image/vehicle.png)
 Store → Plugins → Timer Sensorの+ボタンを押します。
 ![画面](/image/plugin.png)
 
 ### センサ設定の追加
-先程追加したDallaralL15の画面を開き、画像赤丸のボタンからSensor Configurationsを開きます。
+先程追加したDallaraIL15の画面を開き、画像赤丸のボタンからSensor Configurationsを開きます。
 ![画面](/image/sensorconfig_open.png)
 Add New Configurationを押します。
 ![画面](/image/sensorconfig_addnew.png)
@@ -178,7 +178,7 @@ Add New Configurationを押します。
 ![画面](/image/sensorconfig_name.png)
 画像赤丸のボタン(Upload sensor configuration)を押します。
 ![画面](/image/sensorconfig_upload.png)
-本リポジトリのDallaralL15_Autoware.Auto.jsonを選択します。
+本リポジトリのDallaraIL15_Autoware.Auto.jsonを選択します。
 ![画面](/image/sensorconfig_select.png)
 Saveボタンを押します。
 ![画面](/image/sensorconfig_save.png)
@@ -263,5 +263,9 @@ githubの更新などがある場合は、以下のURLのissueに新たにコメ
 
 https://github.com/AutomotiveAIChallenge/aichallenge2021/issues/1
 
-## お問い合わせ受付に関して  
-競技内容、リポジトリ内容物等に関するお問い合わせについては、github上のissueにてお願いします。  
+## お問い合わせ受付に関して
+競技内容、リポジトリ内容物等に関するお問い合わせについては、github上のissueにてお願いします。質問は日本語、英語どちらでも構いません。質問者様は質問が解決した際issueをcloseしてください。
+
+質問内容は競技内容に直接関係あるものに限ります。ソフトウェアの使用方法に関するご質問については、公平性の観点から回答いたしかねます。
+
+各issueでの質問については、基本的に2営業日以内に回答いたします。ただし、検討に時間を要する質問や質問数が多い場合等については、2営業日以上いただく可能性があることはご理解ください。

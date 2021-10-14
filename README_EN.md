@@ -162,13 +162,13 @@ Then enter an appropriate name and click "Create cluster".
 ### Maps/Vehicles/Plugins Registration
 Store → Maps → IndianapolisMotorSpeedway, then press the "+" button.
 ![Screen](/image/map.png)
-Store → Vehicles → DallaralL15, then press the "+" button.
+Store → Vehicles → DallaraIL15, then press the "+" button.
 ![Screen](/image/vehicle.png)
 Store → Plugins → Timer Sensor, then press the "+" button.
 ![Screen](/image/plugin.png)
 
 ### Adding Sensor Settings
-Open the DallaralL15 screen that you just added, and open "Sensor Configurations" from the button in the red circle in the image.
+Open the DallaraIL15 screen that you just added, and open "Sensor Configurations" from the button in the red circle in the image.
 ![Screen](/image/sensorconfig_open.png)
 Press "Add New Configuration".
 ![Screen](/image/sensorconfig_addnew.png)
@@ -176,7 +176,7 @@ Set the name "Autoware.Auto", Bridge "ROS2", and press Apply.
 ![Screen](/image/sensorconfig_name.png)
 Press the "Upload sensor configuration" in the red circle in the image.
 ![Screen](/image/sensorconfig_upload.png)
-Select DallaralL15_Autoware.Auto.json in this repository.
+Select DallaraIL15_Autoware.Auto.json in this repository.
 ![Screen](/image/sensorconfig_select.png)
 Press the "Save" button.
 ![Screen](/image/sensorconfig_save.png)
@@ -259,5 +259,9 @@ If you subscribe to this issue, you will be notified when it is updated (please 
 
 https://github.com/AutomotiveAIChallenge/aichallenge2021/issues/1
 
-## Regarding acceptance of inquiries  
-If you have any questions about the competition, repository contents, etc., please contact us via the issue on github.  
+## Regarding acceptance of inquiries
+If you have any questions about the competition, repository contents, etc., please contact us via the issue on github. Questions can be asked in either English or Japanese. Please close the issue when your question is resolved.
+
+Questions must be directly related to the content of the competition. Questions regarding the use of the software will not be answered in the interest of fairness.
+
+Questions on each issue will basically be answered within two business days. However, please understand that it may take more than two business days if the question requires time to be reviewed or if there are many questions.
