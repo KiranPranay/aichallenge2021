@@ -5,6 +5,10 @@
 
 本大会の競技内容・ルールについては[RULE.md](./RULE.md)で確認お願いいたします。
 
+本大会ではAutoware.Autoをベースとして自動走行の実装を行っていただきます。Autoware.Autoのチュートリアルを下記リンクに用意いたしましたのでご参考にしてください。
+- [Introduction to Autoware.Auto for AI Challenge competitors (pdf)](doc/Introduction_to_Autoware_for_AI_Challenge_Competitors.pdf)
+- [Introduction to Autoware.Auto for AI Challenge competitors (youtube)](https://www.youtube.com/watch?v=p8ay7KTOANM)
+
 ## 動作環境
 本大会で使用していただくPCの動作環境として以下を推奨しております。
 - OS: Ubuntu 20.04

@@ -5,6 +5,11 @@ This repository provides the necessary data for the participants of the [3rd Jap
 
 Please refer to [RULE_EN.md](./RULE_EN.md) for the competition details and rules of this competition.
 
+In this competition, you will implement an autonomous driving system based on Autoware.Auto.
+Please refer to the following link for the tutorial of Autoware.Auto.
+- [Introduction to Autoware.Auto for AI Challenge competitors (pdf)](doc/Introduction_to_Autoware_for_AI_Challenge_Competitors.pdf)
+- [Introduction to Autoware.Auto for AI Challenge competitors (youtube)](https://www.youtube.com/watch?v=p8ay7KTOANM)
+
 ## System Requirements
 ### Running both LGSVL simulator & Autoware in one computer
 - OS: Ubuntu 20.04
