@@ -17,6 +17,7 @@
 #include <lanelet2_core/geometry/LaneletMap.h>
 
 #include <chrono>
+#include <fstream>
 
 using namespace std::chrono_literals;
 
@@ -56,6 +57,16 @@ void AichallengeEvalNode::on_timedata(const aichallenge_msgs::msg::TimeData & ms
   score.trackLimitPenalty = static_cast<float>(track_limit_penalty_);
   score.time = score.rawTime + score.contactPenalty + score.trackLimitPenalty;
   score_pub_->publish(score);
+
+  std::ofstream ofs("/output/score.json");
+  ofs << "{" << std::endl;
+  ofs << "  \"time\": " << score.time << "," << std::endl;
+  ofs << "  \"rawTime\": " << score.rawTime << "," << std::endl;
+  ofs << "  \"hasFinished\": " << score.hasFinished << "," << std::endl;
+  ofs << "  \"contactPenalty\": " << score.contactPenalty << "," << std::endl;
+  ofs << "  \"trackLimitPenalty\": " << score.trackLimitPenalty << std::endl;
+  ofs << "}" << std::endl;
+  ofs.close();
 }
 
 void AichallengeEvalNode::on_vehiclepose(const geometry_msgs::msg::PoseStamped & msg)

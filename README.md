@@ -54,8 +54,17 @@ Got permission denied while trying to connect to the Docker daemon socket at ...
 事前に[git lfs](https://packagecloud.io/github/git-lfs/install)をインストールしてください。
 
 ```
+sudo apt install git-lfs
+git lfs install --skip-repo
+
 git clone https://github.com/AutomotiveAIChallenge/aichallenge2021
 ```
+
+PCDファイルがLFSサーバーから正常にダウンロードされていることを確認してください。
+```
+ls -lh aichallenge2021/autoware/adehome/aichallenge_ws/src/aichallenge_launch/data/IndianapolisMotorSpeedway.pcd
+```
+正常にダウンロードされている場合、ファイルサイズは約300MBになります。
 
 ### ROS2+Autoware.Autoのインストール
 Autoware.AutoはADEを使用してDocker環境でセットアップされることが推奨されています。(https://autowarefoundation.gitlab.io/autoware.auto/AutowareAuto/installation-ade.html)
@@ -243,7 +252,6 @@ source ~/aichallenge_ws/install/setup.bash
 ros2 topic echo /aichallenge/score
 ```
 
-
 又、publishされるタイミングは下記の場合になります。
 1. ゴール到達時
 2. scenario.train.pyを実行し、5分間経過した場合
@@ -257,6 +265,101 @@ ros2 topic echo /aichallenge/score
 - contactPenalty : 接触によるペナルティです。(1回につき5秒タイムに上乗せ)
 - trackLimitPenalty : コースアウトによるペナルティです。(コース外にいた時間がタイムに上乗せされます。)
 
+# オンライン評価環境について
+## 評価時のオンライン環境での実行フローの概略
+スコアの算出にあたっては、オンライン評価環境のwebページよりパッケージ`aichallenge_submit`のみを提出していただき、自動採点を行います。
+提出後、オンライン評価環境では`evaluation/`以下のスクリプトを使って下記の手順で評価されます。
+
+### (1) aichallenge_submitの配置
+アップロードしていただいた`aichallenge_submit.tar.gz`は`evaluation/`以下に配置されます。
+
+### (2) docker build
+`evaluation/build.sh`が実行され、`evaluation/Dockerfile`で定義されるdockerイメージが作成されます。このイメージの作成手順は下記の通りです。
+
+1. `/opt/AutowareAuto`に`binary-foxy:1.0.0`で提供されているビルド済みのAutoware、`/opt/aichallenge_ws`に本リポジトリの`autoware/adehome/aichallenge_ws`で提供されているソースの配置
+2. `ros-foxy-lgsvl-bridge`と`lgsvl/PythonAPI`のインストール
+3. 提出いただいた`aichallenge_submit.tar.gz`を`/opt/aichallenge_ws/src/aichallenge_submit`へ展開
+4. `rosdep install`と`colcon build`の実行
+
+### (3) シミュレーション実行
+オンライン評価環境でsimulatorが立ち上がり、APIモードのシミュレーションが開始されます。
+
+同一のマシンで`evaluation/run.sh`が実行され、dockerコンテナが立ち上がり採点が行われます。コンテナ内では`evaluation/main.bash`の実行によって、以下が行われます。
+
+1. rosbagの記録開始
+2. lgsvl_bridgeの立ち上げ
+3. ROS2ノード群の起動
+4. シナリオの開始
+
+実際の採点時の手順や実行されるコマンドも、simulatorの自動起動/終了・scoreの取得・rosbagのアップロード等の手順が追加されていることを除いて`evaluation/main.bash`と同一です。
+
+`evaluation/run.sh`で実行した場合、`evaluation/output`以下にrosbagと実行時ログ(ros2 launchの出力)が保存されます。
+
+#### 実行されるシナリオについて
+オンライン評価環境では下の2つのシナリオが実行されます。
+
+- 配布シナリオ(`scenario.train.py`)
+
+    オンライン評価環境での動作を検証できるよう、配布しているシナリオについても実行され、その時のrosbagと実行時ログがwebページから取得できます。このシナリオのタイムは順位には関係しません。
+
+- 評価用シナリオ(非公開)
+
+    配布していないタイム評価のためのシナリオです。このシナリオの実行時のタイムトピックの出力を記録し、順位を決めるタイムとします。rosbagや実行時ログはダウンロードできません。
+    
+
+## オンライン評価環境にソースコードを提出する際の手順
+### (1) ソースコードを圧縮する
+`autoware/adehome/aichallenge_ws/src/aichallenge_submit/create-tar-file.sh`を使用し`aichallenge_submit`内のソースコードを圧縮してください。
+
+```sh
+cd autoware/adehome/aichallenge_ws/src/aichallenge_submit/
+./create-tar-file.sh
+```
+
+`autoware/adehome/aichallenge_ws/src/aichallenge_submit.tar.gz`に圧縮済みのファイルが生成されていることを確認してください。
+
+### (2) `evaluation/` でdocker内での自動実行ができることを確認する
+オンライン評価環境にアップロードする前に、ローカル環境を使いオンライン環境と同様のDockerコンテナ内でビルド・実行ができることを以下の手順で確認してください。
+
+まず、(1)で作成した`aichallenge_submit.tar.gz`を`evaluation/`以下に配置してください。ファイル構成は下記のようになります。
+```
+evaluation/
+|-- Dockerfile
+|-- aichallenge_submit.tar.gz
+|-- build.sh
+|-- main.bash
+`-- run.sh
+```
+
+- `evaluation/output/`には実行時のrosbagやスコアの記録が保存されます。以前の実行時に作成されたディレクトリがあれば削除してください。
+- `evaluation/bringup/`にはこのリポジトリの内容(のうち必要な部分)が`./build.sh`を実行した時にコピーされます。
+
+次に、作成いただいた`aichallenge_submit`を含むdockerイメージをビルドしてください。
+```sh
+./build.sh
+```
+
+ビルドが完了したら、本READMEの手順通りにシミュレーターを起動し、APIモードのシミュレーションを開始してください。API ready!と表示されていることを確認したら、`run.sh`によってdockerコンテナを立ち上げ採点のフローを実行してください。
+`run.sh`内で使われている環境変数`LG_VEHICLE_ID`は本READMEのセンサ設定時に取得したconfiguration idに設定してください。
+```sh
+export LG_VEHICLE_ID='{取得したconfiguration id}'
+./run.sh
+```
+
+最後に、`evaluation/output/score.json`に出力されるスコアを確認してください。`evaluation/output/`以下にはrosbagと実行時ログも出力されますので、デバッグ等の参考にしてください。
+
+### (3) オンライン評価環境webページよりソースをアップロードする
+
+[webページ](https://aichallenge21.tier4.jp/)にログイン後画面の指示に従って(1)で作成した`aichallenge_submit.tar.gz`をアップロードしてください。
+
+アップロードが終了すると、ソースのビルド・シミュレーションの実行が順番に行われます。
+
+- 正常に終了した場合は`Scoring complete`と表示され、配布シナリオ・評価用シナリオそれぞれのタイムが表示されます。さらに配布シナリオについては`evaluation/output/`に出力されるものと同様のrosbagと実行時ログがタイム下に表示されるリンクよりダウンロードできます。最後にアップロードした評価シナリオのタイムが、ランキングにて最終タイムとして使われます。
+- 正常にシナリオ実行が終了しても、launchに失敗した等でスコアが出力されていない場合は`No result`、チェックポイントを全て通過していない場合は`Checkpoint not passed`と表示され、いずれの場合も最終的なタイムとしては使われません。
+- ビルドに失敗した場合は`Build error`が表示されます。(1),(2)の手順に従ってDocker imageのビルドができることを再度ご確認ください。
+- シミュレーターの実行に失敗した場合は`Simulator error`と表示されます。この場合サーバーサイドで内部エラーが生じている可能性があるため再度アップロードお願いします。繰り返し表示されてしまう場合はお問合せください。
+
+なお、採点実行中は新たなソースのアップロードはできません。またアップロードできるのは1日3回までで、日本時間0時にリセットされます。
 
 # お問い合わせ
 

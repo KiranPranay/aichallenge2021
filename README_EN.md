@@ -53,10 +53,18 @@ Got permission denied while trying to connect to the Docker daemon socket at ...
 
 ### Clone This Repository
 Please install [git lfs](https://packagecloud.io/github/git-lfs/install) beforehand.
-
 ```
+sudo apt install git-lfs
+git lfs install --skip-repo
+
 git clone https://github.com/AutomotiveAIChallenge/aichallenge2021
 ```
+
+Please make sure pcd file is downloaded from LFS server.
+```
+ls -lh aichallenge2021/autoware/adehome/aichallenge_ws/src/aichallenge_launch/data/IndianapolisMotorSpeedway.pcd
+```
+The file size is about 300MB if it is normally downloaded.
 
 ### Install ROS2+Autoware.Auto
 Autoware.Auto is recommended to be set up in a Docker environment using ADE.(https://autowarefoundation.gitlab.io/autoware.auto/AutowareAuto/installation-ade.html)
@@ -254,6 +262,100 @@ The contents of `/aichallenge/score` are as follows.
 - hasFinished : Turn to be 1 when reaching the goal, 0 otherwise.
 - contactPenalty : Penalty for vehicle collision. (5 seconds will be added to the time for each collision)
 - trackLimitPenalty : Penalty for going off course.(The time spent off the course is added to the time.)
+
+# Online Evaluation Environment
+## Execution flow in the online environment during evaluation
+To calculate the score, submit only the package `aichallenge_submit` from the web page of the online evaluation environment, and it will be scored automatically.
+After the submission, the online evaluation environment will evaluate your work using the script under `evaluation/` in the following steps.
+
+### (1) Placement of aichallenge_submit
+The `aichallenge_submit.tar.gz` you uploaded will be placed under `evaluation/`.
+
+### (2) docker build
+Execute `evaluation/build.sh` to create the docker image defined in `evaluation/Dockerfile`. The procedure to create this image is as follows:
+
+1. Place the pre-built Autoware provided by `binary-foxy:1.0.0` to `/opt/AutowareAuto`, and the source provided by `autoware/adehome/aichallenge_ws` in this repository to `/opt/aichallenge_ws`.
+2. Install `ros-foxy-lgsvl-bridge` and `lgsvl/PythonAPI`.
+3. Extract the submitted `aichallenge_submit.tar.gz` to `/opt/aichallenge_ws/src/aichallenge_submit`.
+4. Run `rosdep install` and `colcon build`.
+
+### (3) Simulation execution
+In the online evaluation environment, simulator will be launched and API mode simulation will be started.
+
+On the same machine, `evaluation/run.sh` will be executed, and the docker container will be launched and scored. In the container, the following is done by running `evaluation/main.bash`.
+1. Start recording rosbag.
+2. Launch lgsvl_bridge
+3. Launch the ROS2 nodes
+4. Run the scenario
+
+The actual scoring procedure and the commands to be executed are the same as in `evaluation/main.bash`, except that the following procedures are added: automatic startup/shutdown of the simulator, score acquisition, and rosbag upload.
+
+If you run it with `evaluation/run.sh`, the rosbag and runtime log (output of ros2 launch) will be saved under `evaluation/output`.
+
+#### Scenarios to be run
+In the online evaluation environment, the following two scenarios will be executed.
+
+- Distributed scenarios (`scenario.train.py`)
+
+    In order to be able to verify the behavior in the online evaluation environment, the distributed scenario will also be run, and the rosbag and runtime logs can be obtained from the web page. The time for this scenario is not related to the ranking.
+
+- Scenarios for evaluation (undisclosed)
+
+    This is a scenario for time evaluation that is not distributed. The output of the time topic when this scenario is run is recorded and used as the time to determine the ranking. Neither the rosbag nor the runtime log can be downloaded.
+
+## Procedure for submitting source code to the online evaluation environment
+### (1) Compress your source code.
+Use `autoware/adehome/aichallenge_ws/src/aichallenge_submit/create-tar-file.sh` to compress the source code in `aichallenge_submit`.
+
+```sh
+cd autoware/adehome/aichallenge_ws/src/aichallenge_submit/
+./create-tar-file.sh
+```
+
+Make sure that a compressed file is created in `autoware/adehome/aichallenge_ws/src/aichallenge_submit.tar.gz`.
+
+### (2) Make sure that scenario can be executed automatically in docker inside `evaluation/`.
+Before uploading to the online evaluation environment, please confirm that you can build and execute in a Docker container similar to the online environment using the local environment by following the steps below.
+
+First, place the file `aichallenge_submit.tar.gz` created in (1) under `evaluation/`. The file structure is as follows.
+```
+evaluation/
+|-- Dockerfile
+|-- aichallenge_submit.tar.gz
+|-- build.sh
+|-- main.bash
+`-- run.sh
+```
+
+- `evaluation/output/` will store the rosbag and score records from the run. Remove any directories created by previous runs.
+- In `evaluation/bringup/`, the contents of this repository (the part you need) will be stored by `./build.sh`.
+
+Next, build the docker image that contains the `aichallenge_submit` you created.
+```sh
+./build.sh
+```
+
+After the build is complete, start the simulator as described in this README and start the API mode simulation. After confirming that the message "API ready!" is displayed, launch the docker container and run the scoring flow by `run.sh`.
+The environment variable `LG_VEHICLE_ID` used in `run.sh` should be set to the configuration id obtained when configuring the sensor in this README.
+```sh
+export LG_VEHICLE_ID='{configuration id you got}'
+./run.sh
+```
+
+Finally, check the score output in `evaluation/output/score.json`. The rosbag and runtime logs are also output under `evaluation/output/`, so please refer to them for debugging.
+
+### (3) Upload the source from the online evaluation environment web page
+
+After logging in to the [web page](https://aichallenge21.tier4.jp/), follow the instructions on the screen to upload the file `aichallenge_submit.tar.gz` created in (1).
+
+After the upload is finished, the source build and simulation will be executed in order.
+
+- If the simulation is completed successfully, the message `Scoring complete` will be displayed, and the time for both the distribution scenario and the evaluation scenario will be displayed. In addition, you can download the same rosbag and runtime log that is output in `evaluation/output/` for the distribution scenario from the link shown below the time. The time of the last uploaded evaluation scenario will be used as the final time in the ranking.
+- Even if the scenario finishes successfully, it will be displayed as `No result` if there is no score output due to launch failure, or `Checkpoint not passed` if not all checkpoints have been passed.
+- If the build fails, `Build error` will be displayed. Please follow steps (1) and (2) to check again that the Docker image can be built.
+- If the simulator fails to run, the message `Simulator error` will be displayed. In this case, there may be an internal error on the server side, so please upload the file again. If this happens repeatedly, please contact us.
+
+Please note that you cannot upload new sources while evaluation is in progress. Uploading is limited to three times a day and will be reset at midnight Japan time.
 
 # Contact us
 

@@ -4,3 +4,6 @@
 !aichallenge_ws
 /autoware/adehome/aichallenge_ws/*
 !src
+/evaluation/aichallenge_submit.tar.gz
+/evaluation/bringup
+/evaluation/output
