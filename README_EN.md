@@ -369,6 +369,8 @@ https://github.com/AutomotiveAIChallenge/aichallenge2021/issues/1
 ## Regarding acceptance of inquiries
 If you have any questions about the competition, repository contents, etc., please contact us via the issue on github. Questions can be asked in either English or Japanese. Please close the issue when your question is resolved.
 
+If you have any questions about your online simulator account, such as not being able to log in to the online simulator, please contact ai-challenge@jsae.or.jp.
+
 Questions must be directly related to the content of the competition. Questions regarding the use of the software will not be answered in the interest of fairness.
 
 Questions on each issue will basically be answered within two business days. However, please understand that it may take more than two business days if the question requires time to be reviewed or if there are many questions.
